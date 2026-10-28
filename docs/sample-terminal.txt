@@ -1,0 +1,28 @@
+[1/5] reading buggy_inventory and measuring baseline coverage
+      baseline line coverage 52.1% (existing tests)
+[2/5] writing tests with nvidia/Nemotron-3_5-Lightning
+  [model] write      nvidia/Nemotron-3_5-Lightning  2314 in / 933 out  0.0s  attempts=1  cost n/a
+      13 tests written
+[3/5] run / triage / repair loop (up to 3 rounds)
+      round 1: 17 passed, 5 failing (5 new), coverage 81.2%
+  [model] triage     nvidia/Nemotron-3-Ultra-550b-a55b  1764 in / 932 out  0.0s  attempts=1  $0.00456
+      round 2: 19 passed, 3 failing (0 new), coverage 85.4%
+      coverage 85.4% < 90% target, asking for tests on uncovered lines
+  [model] coverage   nvidia/Nemotron-3_5-Lightning  3240 in / 472 out  0.0s  attempts=1  cost n/a
+      round 3: 28 passed, 3 failing (0 new), coverage 100.0%
+[4/5] finalising: keep passing tests and confirmed bugs
+[5/5] running bug repros
+
+coverage 52.1% -> 100.0% | 16 passing tests kept | 3 likely bugs
+  BUG Inventory.remove (buggy_inventory/stock.py:62)
+      remove only checks qty > on_hand, so a negative quantity silently adds stock instead of
+      being rejected.
+  BUG needs_reorder (buggy_inventory/stock.py:8)
+      needs_reorder compares with < instead of <=, so an item sitting exactly at its reorder point
+      is never flagged.
+  BUG order_total_cents (buggy_inventory/pricing.py:37)
+      order_total_cents truncates with int() instead of rounding, so any total with a fractional
+      cent of .5 or more comes out one cent low.
+tests:  docs/sample-run/test_buggy_inventory_testsmith.py
+report: docs/sample-run/report.md
+model:  3 calls, 9,655 tokens
